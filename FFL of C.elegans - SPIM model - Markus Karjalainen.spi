@@ -1,0 +1,21 @@
+directive sample 8.0 8000
+directive plot X1();X2();Y();Z()
+
+val w1  = 0.5 (* weight of input to X1 *)
+val w2  = 0.5 (* weight of input to X2 *)
+val w1' = w1
+val w2' = w2
+val ky  = 0.4 (* Y's activation threshold *)
+val w3' = (w1 + w2 - ky) (* weight of output from Y *)
+val kz  = 0.4 (* Z's activation threshold *)
+val a = 1.0 (* delay rate / relaxation rate *)
+
+let X1() = delay@a; 
+    (if(w1 > ky) then Y() | if((w1 + w3') > kz) then Z()) and
+    X2() = delay@a; 
+	( if(w2 > ky) then Y() | if((w2 + w3') > kz) then Z()) and
+    Y() = if((w1 + w2) > ky) then delay@a; 
+	if(w3' > kz) then Z() and
+    Z() = if((w1' + w2' + w3') > kz) then delay@a; () 
+
+run (8000 of X1() | 8000 of X2() | 8000 of Y() | 8000 of Z())
